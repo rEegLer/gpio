@@ -6,6 +6,7 @@ It is intended to mimick [RPIO](http://pythonhosted.org/RPIO/) as much as possib
 for all features, while also supporting additional (and better named) functionality 
 to the same methods.
 
+FORKED TO INCLUDE MOXA UC-5102-T-LX LED's
 
 ## Supported Features
 - get pin values with `read(pin)` or `input(pin)`
