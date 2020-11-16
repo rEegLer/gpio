@@ -15,3 +15,4 @@ to the same methods.
 - get the pin mode with `mode(pin)`
 - set the pin mode with `setup(pin, mode)`
     - `mode` can currently equal `gpio.IN` or `gpio.OUT`
+- set LED's on front face of MOXA UC-5100 series with `lset(pin, value)`
