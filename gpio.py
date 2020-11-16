@@ -25,6 +25,14 @@ class PinState(object):
 
 path = os.path
 pjoin = os.path.join
+"""
+Updated for MOXA UC-5100 series
+"""
+lpath = os.path
+lpjoin = os.path.join
+
+led_root = '/sys/class/leds'
+ledpath = lambda pin: os.path.join(led_root, 'UC5100:YELLOW:SGN{0}'.format(pin))
 
 gpio_root = '/sys/class/gpio'
 gpiopath = lambda pin: os.path.join(gpio_root, 'gpio{0}'.format(pin))
@@ -44,12 +52,21 @@ def _write(f, v):
     f.write(str(v))
     f.flush()
 
+def _ledwrite(f, v):
+    log.debug("writing: {0}: {1}".format(f, v))
+    f.write(str(v))
+    f.flush()
+
 
 def _read(f):
     log.debug("Reading: {0}".format(f))
     f.seek(0)
     return f.read().strip()
 
+def _ledread(f):
+    log.debug("Reading: {0}".format(f))
+    f.seek(0)
+    return f.read().strip()
 
 def _verify(function):
     """decorator to ensure pin is properly set up"""
@@ -113,7 +130,7 @@ def cleanup(pin=None, assert_exists=False):
 
 
 @_verify
-def setup(pin, mode, pullup=None, initial=False, active_low=None):
+def setup(pin, mode, pullup=None, initial=False, active_low=None, led=None):
     '''Setup pin with mode IN or OUT.
 
     Args:
@@ -138,6 +155,11 @@ def setup(pin, mode, pullup=None, initial=False, active_low=None):
         f_active_low = _open[pin].active_low
         _write(f_active_low, int(active_low))
 
+    if led is not None:
+        if not isinstance(led, bool):
+            raise ValueError("LED argument must be True or False")
+        log.debug("Set LED {0}: {1}".format(pin, active_low))
+
     log.debug("Setup {0}: {1}".format(pin, mode))
     f_direction = _open[pin].direction
     _write(f_direction, mode)
@@ -157,6 +179,7 @@ def mode(pin):
     '''
     f = _open[pin].direction
     return _read(f)
+
 
 
 @_verify
@@ -181,6 +204,15 @@ def set(pin, value):
     log.debug("Write {0}: {1}".format(pin, value))
     f = _open[pin].value
     _write(f, value)
+
+def lset(pin, brightness):
+    '''set the pin value to 0 or 1'''
+    if brightness is LOW:
+        brightness = 0
+    brightness = int(bool(brightness))
+    log.debug("Write {0}: {1}".format(pin, brightness))
+    f = _open[pin].brightness
+    _write(f, brightness)
 
 
 @_verify
