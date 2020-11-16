@@ -23,6 +23,19 @@ class PinState(object):
         self.direction = direction
         self.active_low = active_low
 
+class LedPinState(object):
+    """An ultra simple pin-state object.
+
+    Keeps track data related to each pin.
+
+    Args:
+        value: the file pointer to set/read value of pin.
+        direction: the file pointer to set/read direction of the pin.
+        active_now: the file pointer to set/read if the pin is active_low.
+    """
+    def __init__(self, brightness):
+        self.brightness = brightness
+
 path = os.path
 pjoin = os.path.join
 """
@@ -95,6 +108,27 @@ def _verify(function):
         return function(pin, *args, **kwargs)
     return wrapped
 
+def _ledverify(function):
+    """decorator to ensure pin is properly set up"""
+    # @functools.wraps
+    def wrapped(pin, *args, **kwargs):
+        pin = int(pin)
+        if pin not in _open:
+            ppath = ledpath(pin)
+            if not os.path.exists(ppath):
+                log.debug("Could not find Pin {0}".format(pin))
+                
+            value = None
+            try:
+                brightness = open(pjoin(ppath, 'brightness'), FMODE)
+                
+            except Exception as e:
+                if brightness: brightness.close()
+                
+                raise e
+            _ledopen[pin] = LedPinState(brightness = brightness)
+        return function(pin, *args, **kwargs)
+    return wrapped
 
 def cleanup(pin=None, assert_exists=False):
     """Cleanup the pin by closing and unexporting it.
@@ -206,6 +240,7 @@ def set(pin, value):
     f = _open[pin].value
     _write(f, value)
 
+@_ledverify
 def lset(pin, brightness):
     '''set the pin value to 0 or 1'''
     if brightness is LOW:
