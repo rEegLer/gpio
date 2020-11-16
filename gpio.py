@@ -41,6 +41,7 @@ _export_lock = threading.Lock()
 _pyset = set
 
 _open = dict()
+_lopen = dict()
 FMODE = 'w+'
 
 IN, OUT = 'in', 'out'
@@ -52,9 +53,9 @@ def _write(f, v):
     f.write(str(v))
     f.flush()
 
-def _ledwrite(f, v):
-    log.debug("writing: {0}: {1}".format(f, v))
-    f.write(str(v))
+def _ledwrite(f, brightness):
+    log.debug("writing: {0}: {1}".format(f, brightness))
+    f.write(str(brightness))
     f.flush()
 
 
@@ -211,8 +212,8 @@ def lset(pin, brightness):
         brightness = 0
     brightness = int(bool(brightness))
     log.debug("Write {0}: {1}".format(pin, brightness))
-    f = _open[pin].brightness
-    _write(f, brightness)
+    f = _lopen[pin].brightness
+    _ledwrite(f, brightness)
 
 
 @_verify
