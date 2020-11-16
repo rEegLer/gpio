@@ -126,7 +126,7 @@ def _ledverify(function):
                 if brightness: brightness.close()
                 
                 raise e
-            _ledopen[pin] = LedPinState(brightness = brightness)
+            _lopen[pin] = LedPinState(brightness = brightness)
         return function(pin, *args, **kwargs)
     return wrapped
 
